@@ -1,123 +1,557 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>同人女XP二选一</title>
+<style>
+  :root {
+    --bg: #faf5ff;
+    --card: #ffffff;
+    --text: #2d1b4e;
+    --sub: #7c5cbf;
+    --accent: #9333ea;
+    --accent2: #db2777;
+    --win: #fdf2f8;
+    --border: #e9d5ff;
+    --shadow: 0 4px 24px rgba(147, 51, 234, 0.10);
+    --shadow-hover: 0 8px 32px rgba(147, 51, 234, 0.18);
+    --vs-bg: linear-gradient(135deg, #9333ea, #db2777);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(147, 51, 234, 0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(219, 39, 119, 0.04) 0%, transparent 50%);
+  }
+
+  /* ---- header ---- */
+  .header {
+    text-align: center;
+    padding: 32px 20px 12px;
+    width: 100%;
+    max-width: 800px;
+  }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    background: var(--vs-bg);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 2px;
+  }
+  .header .subtitle {
+    font-size: 14px;
+    color: var(--sub);
+    margin-top: 6px;
+  }
+
+  /* ---- progress ---- */
+  .progress-wrap {
+    width: 100%;
+    max-width: 800px;
+    padding: 0 24px 20px;
+  }
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--sub);
+    margin-bottom: 8px;
+  }
+  .progress-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--vs-bg);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+  .round-tag {
+    display: inline-block;
+    background: var(--border);
+    color: var(--accent);
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  /* ---- main area ---- */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 800px;
+    padding: 0 24px 40px;
+  }
+
+  /* ---- VS arena ---- */
+  .arena {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 680px;
+    margin-bottom: 24px;
+  }
+  .vs-badge {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--vs-bg);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 18px;
+    letter-spacing: 1px;
+    z-index: 2;
+    box-shadow: 0 2px 12px rgba(147, 51, 234, 0.3);
+  }
+
+  .card {
+    flex: 1;
+    min-width: 0;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--accent);
+  }
+  .card:active {
+    transform: scale(0.97);
+  }
+  .card .card-text {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    position: relative;
+    z-index: 1;
+    line-height: 1.4;
+  }
+  .card .card-hint {
+    font-size: 12px;
+    color: var(--sub);
+    margin-top: 8px;
+    opacity: 0.6;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--vs-bg);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 14px;
+  }
+  .card:hover::before {
+    opacity: 0.04;
+  }
+
+  /* ---- selected / eliminated ---- */
+  .card.selected {
+    border-color: var(--accent);
+    background: var(--win);
+    animation: pulse 0.5s ease;
+  }
+  .card.eliminated {
+    opacity: 0.3;
+    transform: scale(0.94);
+    pointer-events: none;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(40px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .card.anim-left { animation: slideInLeft 0.4s ease; }
+  .card.anim-right { animation: slideInRight 0.4s ease; }
+
+  /* ---- counter ---- */
+  .counter {
+    font-size: 14px;
+    color: var(--sub);
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  /* ---- buttons ---- */
+  .btn {
+    padding: 12px 36px;
+    border: none;
+    border-radius: 24px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    letter-spacing: 1px;
+  }
+  .btn-primary {
+    background: var(--vs-bg);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(147, 51, 234, 0.25);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(147, 51, 234, 0.35);
+  }
+  .btn-secondary {
+    background: var(--card);
+    color: var(--accent);
+    border: 2px solid var(--border);
+  }
+  .btn-secondary:hover {
+    border-color: var(--accent);
+    background: var(--win);
+  }
+
+  /* ---- champion ---- */
+  .champion-screen {
+    text-align: center;
+    animation: fadeInUp 0.6s ease;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .champion-card {
+    display: inline-block;
+    background: var(--card);
+    border: 3px solid var(--accent);
+    border-radius: 24px;
+    padding: 40px 48px;
+    box-shadow: 0 8px 40px rgba(147, 51, 234, 0.15);
+    margin: 20px 0;
+  }
+  .champion-card .crown {
+    font-size: 56px;
+    margin-bottom: 8px;
+    animation: bounce 1s ease infinite;
+  }
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .champion-card .champion-name {
+    font-size: 36px;
+    font-weight: 900;
+    background: var(--vs-bg);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .champion-card .champion-label {
+    font-size: 14px;
+    color: var(--sub);
+    margin-top: 4px;
+  }
+  .bracket-history {
+    margin-top: 24px;
+    font-size: 13px;
+    color: var(--sub);
+    line-height: 2;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  /* ---- start screen ---- */
+  .start-screen {
+    text-align: center;
+    animation: fadeInUp 0.6s ease;
+    padding: 40px 0;
+  }
+  .start-screen .emoji {
+    font-size: 80px;
+    margin-bottom: 16px;
+  }
+  .start-screen .desc {
+    color: var(--sub);
+    font-size: 15px;
+    margin: 12px 0 24px;
+    line-height: 1.8;
+  }
+
+  /* ---- round result ---- */
+  .round-summary {
+    text-align: center;
+    margin-bottom: 20px;
+    animation: fadeInUp 0.4s ease;
+  }
+  .round-summary h2 {
+    font-size: 20px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+</style>
 </head>
 <body>
-    <h1>欢迎来到我的静态页面</h1>
-    <p>整合管理
-1、制定项目章程
-制定项目章程是编写一份正式批准项目并授权项目经理在项目活动中使用组织资源的文件的过程。本过程的主要作用：1明确项目与组织战略目标之间的直接联系：2确立项目的正式地位；3展示组织对项目的承诺。
-2、制订项目管理计划
-制订项目管理计划是定义、准备和协调项目计划的所有组成部分，并把它们整合为一份综合项目管理计划的过程。本过程的主要作用:生成一份综合文件，用于确定所有项目工作的基础及其执行方式。
-3、指导与管理项目工作
-指导与管理项目工作是为实现项目目标而领导和执行项目管理计划中所确定的工作，并实施已批准变更的过程。本过程的主要作用是对项目工作和可交付成果开展综合管理，以提高项目成功的可能性。
-4、管理项目知识
-管理项目知识是使用现有知识并生成新知识，以实现项目目标并且帮助组织学习的过程。管理项目过程的主要作用：1利用已有的组织知识来创造或改进项目成果：2使当前项目创造的知识可用于支持组织运营和未来的项目或阶段。
-5、监控项目工作是跟踪、审查和报告整体项目进展，以实现项目管理计划中确定的绩效目标的过程。本过程的主要作用：1让干系人了解项目的当前状态并认可为处理绩效问题而采取的行动；2通过成本和进度预测，让干系人了解项目的未来状态。
-6、实施整体变更控制
-实施整体变更控制是审查所有变更请求、批准变更，管理对可交付成果、项目文件和项目管理计划的变更，并对变更处理结果进行沟通的过程。本过程审查对项目文件、可交付成果或项目管理计划的所有变更请求，并决定对变更请求的处置方案.本过程的主要作用是确保对项目中已记录在案的变更做出综合评审。如果不考虑变更对整体项目目标或计划的影响就开展变更，往往会加剧整体项目风险。
-7、结束项目或阶段
-结束项目或阶段是终结项目、阶段或合同的所有活动的过程。本过程的主要作用：存档项目或阶段信息，完成计划的工作；释放组织团队资源以展开新的工作。
-范围管理
-1、规划范围管理
-规划范围管理是为了记录如何定义、确认和控制项目范围及产品范围，而创建范围管理计划的过程。本过程的主要作用是在整个项目期间对如何管理范围提供指南和方向。
-2、收集需求
-收集需求是为实现目标而确定，记录并管理干系人的需要和需求的过程。本过程的主要作用是为定义产品范围和项目范围奠定基础。
-3、定义范围
-定义范围是制定项目和产品详细描述的过程。本过程的主要作用是描述产品、服务或成果的边界和验收标准。
-4、创建WBS
-创建工作分解结构(WBS)是把项目可交付成果和项目工作分解成较小、更易于管理的组件的过程。本过程的主要作用是为所要交付的内容提供架构。
-5、确认范围
-确认范围是正式验收已完成的项目可交付成果的过程。本过程的主要作用：1使验收过程具有客观性：2通过确认每个可交付成果来提高最终产品、服务或成果获得验收的可能性。
-6、控制范围
-控制范围是监督项目和产品的范围状态，管理范围基准变更的过程。本过程的主要作用是在整个项目期间保持对范围基准的维护。
- 
-进度管理
-1、规划进度管理
-规划进度管理是为规划、编制、管理、执行和控制项目进度而制定政策、程序和文档的过程。本过程的主要作用是为如何在整个项目期间管理项目进度提供指南和方向。
-2、定义活动
-定义活动是识别和记录为完成项目可交付成果而须采取的具体行动的过程。本过程的主要作用是，将工作包分解为进度活动，作为对项目工作进行进度估算、规划、执行、监督和控制的基础。
-3、排列活动顺序
-排列活动顺序是识别和记录项目活动之间关系的过程。本过程的主要作用是定义工作之间的逻辑顺序，以便在既定的所有项目制约因素下获得最高的效率。
-4、估算活动持续时间
-估算活动持续时间是根据资源估算的结果，估算完成单项活动所需工作时段数的过程。本过程的主要作用是确定完成每个活动所需花费的时间量。
-5制订进度计划
-制订进度计划是分析活动顺序、持续时间、资源需求和进度制约因素，创建进度模型，从而落实项目执行和监控的过程。本过程的主要作用是为完成项目活动而制定具有计划日期的进度模型。
-6、控制进度
-控制进度是监督项目状态，以更新项目进度和管理进度基准变更的过程。本过程的主要作用是在整个项目期间保持对进度基准的维护。
-成本管理
-1、规划成本管理
-规划成本管理是确定如何估算、预算、管理、监督和控制项目成本的过程，本过程的主要作用是在整个项目期间为如何管理项目成本提供指南和方向。
-2、估算成本
-估算成本是对完成项目工作所需资源成本进行近似估算的过程。本过程的主要作用是确定项目所需的资金。
-3、制定预算
-制定预算是汇总所有单个活动或工作包的估算成本，建立一个经批准的成本基准的过程。本过程的主要作用是，确定可以依据其来进行监督和控制项目绩效的成本基准。项目预算包括经批准用于执行项目的全部资金，而成本基准是经过批准且按时间段分配的项目预算，包括应急储备，但不包括管理储备。
-4、控制成本
-控制成本是监督项目状态，以更新项目成本和管理成本基准变更的过程。本过程的主要作用是在整个项目期间保持对成本基准的维护。
-质量管理
-1、规划质量管理
-规划质量管理是识别项目及其可交付成果的质量要求、标准，并书面描述项目将如何证明符合质量要求、标准的过程。本过程的主要作用是为在整个项目期间如何管理和核实质量提供指南和方向。
-2、管理质量
-管理质量是把组织的质量政策用于项目，并将质量管理计划转化为可执行的质量活动的过程。本过程的主要作用：1提高实现质量目标的可能性；2识别无效过程和导致质量低劣的原因；3使用控制质量过程的数据和结果向干系人展示项目的总体质量状态。
-3、控制质量
-控制质量是为了评估绩效，确保项目输出完整、正确且满足客户期望，而监督和记录质量管理活动执行结果的过程。本过程的主要作用：1核实项目可交付成果和工作已经达到主要干系人的质量要求，可供最终验收；2确定项目输出是否达到预期目的，这些输出需要满足所有适用标准、要求、法规和规范。
-资源管理
-1、规划资源管理.
-规划资源管理是定义如何估算、获取、管理和利用团队以及实物资源的过程。本过程的主要作用是，根据项目类型和复杂程度确定适用于项目资源的管理方法和管理程度。
-2、估算活动资源
-估算活动资源是估算执行项目所需的团队资源，以及材料、设备和用品的类型和数量的过程。本过程的主要作用是明确完成项目所需的资源种类、数量和特性。
-3、获取资源
-获取资源是获取项目所需的团队成员、设施、设备、材料、用品和其他资源的过程。本过程的主要作用：1概述和指导资源的选择：2将选择的资源分配给相应的活动。
-4、建设团队
-建设团队是提高工作能力，促进团队成员互动，改善团队整体氛围，以提高项目绩效的过程。本过程的主要作用是，改进团队协作、增强人际关系技能、激励员工、减少摩擦以及提升整体项目绩效。
-5、管理团队
-管理团队是跟踪团队成员工作表现、提供反馈、解决问题并管理团队变更以优化项目绩效的过程。本过程的主要作用是，影响团队行为、管理冲突以及解决问题。
-6、控制资源
-控制资源是确保按计划为项目分配实物资源，以及根据资源使用计划监督资源实际使用情况，并采取必要纠正措施的过程。本过程的主要作用：1确保所分配的资源适时、适地可用于项目；2资源在不再需要时被释放。
-沟通管理
-1、规划沟通管理
-规划沟通管理是基于每个干系人或干系人群体的信息需求、可用的组织资产，以及具体项目的需求，为项目沟通活动制定恰当的方法和计划的过程。本过程的主要作用：1及时向干系人提供相关信息；2引导干系人有效参与项目；3编制书面沟通计划。
-2、管理沟通
-管理沟通是确保项目信息及时且恰当地收集、生成、发布、存储、检索、管理、监督和最终处置的过程。本过程的主要作用是，促成项目团队与干系人之间的有效信息流动。
-3、监督沟通
-监督沟通是确保满足项目及其干系人的信息需求的过程。本过程的主要作用是，按沟通管理计划和干系人参与计划的要求优化信息传递流程。
 
-风险管理
-1、规划风险管理
-规划风险管理是定义如何实施项目风险管理活动的过程。本过程的主要作用是，确保风险管理的水平、方法和可见度与项目风险程度相匹配，与对组织和其他干系人的重要程度相匹配。
-2、识别风险
-识别风险是识别单个项目风险以及整体项目风险的来源，并记录风险特征的过程。本过程的主要作用：1记录现有的单个项目风险，以及整体项目风险的来源：2汇总相关信息，以便项目团队能够恰当地应对已识别的风险。
-3、实施定性风险分析
-实施定性风险分析是通过评估单个项目风险发生的概率和影响及其他特征，对风险进行优先级排序，从而为后续分析或行动提供基础的过程。本过程的主要作用是重点关注高优先级的风险。
-4、实施定量风险分析
-实施定量风险分析是就已识别的单个项目风险和不确定性的其他来源对整体项目目标的影响进行定量分析的过程。本过程的主要作用：1量化整体项目风险最大可能性；2提供额外的定量风险信息，以支持风险应对规划。
- 
-5、规划风险应对
-规划风险的应对措施是为了应对项目风险，而制定可选方案、选择应对策略并商定应对行动的过程。本过程的主要作用：1制定应对整体项目风险和单个项目风险的适当方法；2分配资源，并根据需要将相关活动添加进项目文件和项目管理计划中。
-6、实施风险应对
-实施风险应对是执行商定的风险应对计划的过程。本过程的主要作用：1确保按计划执行商定的风险应对措施；2管理整体项目风险入口、最小化单个项目威胁，以及最大化单个项目机会。
-7、监督风险
-监督风险是在整个项目期间，监督风险应对计划的实施，并跟踪已识别风险、识别和分析新风险，以及评估风险管理有效性的过程。本过程的主要作用是，保证项目决策是在整体项目风险和单个项目风险当前信息的基础上进行。
+<div class="header">
+  <h1>同人女XP二选一</h1>
+</div>
 
-采购管理
-1、规划采购管理
-规划采购管理是记录项目采购决策、明确采购方法，及识别潜在卖方的过程。本过程的主要作用是确定是否从项目外部获取货物和服务，如果是，则还要确定将在什么时间、以什么方式获取什么货物和服务。货物和服务可从执行组织的其他部门采购，或者从外部渠道采购。
-2、实施采购
-实施采购是获取卖方应答、选择卖方并授予合同的过程。本过程的主要作用是，选定合格卖方并签署关于货物或服务交付的法律协议。本过程的最后成果是签订的协议，包括正式合同。
-3、控制采购
-控制采购是管理采购关系、监督合同绩效、实施必要的变更和纠偏，以及关闭合同的过程。本过程的主要作用是，确保买卖双方履行法律协议，满足项目需求。
-干系人管理
-1、识别干系人
-识别干系人是定期识别项目干系人，分析和记录他们的利益、参与度、相互依赖性、影响力和对项目成功的潜在影响的过程。本过程的主要作用是，使项目团队能够建立对每个干系人或干系人群体的适度关注。
-2、规划干系人参与
-规划干系人参与是根据干系人的需求、期望、利益和对项目的潜在影响，制定项目干系人参与项目的方法的过程。本过程的主要作用是，提供与干系人进行有效互动的可行计划。
-3、管理干系人参与
-管理干系人参与是通过与干系人进行沟通协作，以满足其需求与期望、处理问题，并促进干系人合理参与的过程。本过程的主要作用是，尽可能提高干系人的支持度，并降低干系人的抵制程度。
-4、监督干系人参与
-监督干系人参与是监督项目干系人的关系，并通过修订参与策略和计划来引导干系人合理参与项目的过程。本过程的主要作用是，随着项目进展和环境变化，维持或提升干系人参与活动的效率和效果。
-</p>
+<div class="main" id="app"></div>
+
+<script>
+// ===================== DATA =====================
+// 取 32 项（2^5），保证全程无轮空晋级
+const ALL_ITEMS = [
+  "恨海情天","破镜重圆","镜花水月","枯木逢春",
+  "烂人真心","圣人私心","明月高悬","欢喜冤家",
+  "宿敌变挚友","挚友变宿敌","宿敌","挚友",
+  "相爱相杀","师徒","骨科","伪骨科",
+  "爱而不得","先婚后爱","强制爱","默默守护",
+  "青梅竹马","天降","年上","年下",
+  "救赎","一起腐烂","暗恋","明恋",
+  "双强","霸总娇妻","追妻火葬场","追夫火葬场"
+];
+
+// ===================== STATE =====================
+let currentItems = [];   // items in current round
+let winners = [];        // picked winners (one per pair, filled as user selects)
+let currentPair = 0;     // which pair is active (0-indexed)
+let roundNum = 0;        // round counter for display
+let bracketLog = [];     // [{round, pair, left, right, picked}]
+
+// ===================== SETUP =====================
+function initGame() {
+  currentItems = ALL_ITEMS.slice();
+  winners = new Array(Math.floor(currentItems.length / 2)).fill(null);
+  currentPair = 0;
+  roundNum = 0;
+  bracketLog = [];
+  render();
+}
+
+// ===================== RENDER =====================
+const app = document.getElementById('app');
+
+function render() {
+  // Champion?
+  if (currentItems.length === 1) {
+    renderChampion(currentItems[0]);
+    return;
+  }
+
+  const totalPairs = currentItems.length / 2;
+
+  // Current pair
+  const i = currentPair * 2;
+  const left  = currentItems[i];
+  const right = currentItems[i + 1];
+  const picked = winners[currentPair] !== null ? winners[currentPair] : null;
+
+  const doneThisRound = winners.filter(w => w !== null).length;
+  const progress = Math.round((doneThisRound / totalPairs) * 100);
+
+  let roundLabel;
+  const N = currentItems.length;
+  if (totalPairs > 10) {
+    roundLabel = `初赛（${N} 进 ${totalPairs}）`;
+  } else if (totalPairs > 4) {
+    roundLabel = `${N} 强晋级赛`;
+  } else if (totalPairs > 1) {
+    roundLabel = `半决赛（${N} 进 ${totalPairs}）`;
+  } else {
+    roundLabel = `🏆 决赛`;
+  }
+
+  app.innerHTML = `
+    <div class="progress-wrap">
+      <div class="round-tag">${roundLabel}</div>
+      <div class="progress-info">
+        <span>第 ${roundNum + 1} 轮 · 剩余 ${N} 项</span>
+        <span>${doneThisRound} / ${totalPairs}</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:${progress}%"></div>
+      </div>
+    </div>
+
+    <div class="arena">
+      <div class="card anim-left ${picked === left ? 'selected' : picked !== null ? 'eliminated' : ''}"
+           onclick="pick(0)" id="card-left">
+        <div class="card-text">${left}</div>
+        <div class="card-hint">点我选择</div>
+      </div>
+      <div class="vs-badge">VS</div>
+      <div class="card anim-right ${picked === right ? 'selected' : picked !== null ? 'eliminated' : ''}"
+           onclick="pick(1)" id="card-right">
+        <div class="card-text">${right}</div>
+        <div class="card-hint">点我选择</div>
+      </div>
+    </div>
+
+    <div class="counter">第 ${currentPair + 1} / ${totalPairs} 组</div>
+  `;
+}
+
+// ===================== PICK =====================
+function pick(side) {
+  const i = currentPair * 2;
+  const left  = currentItems[i];
+  const right = currentItems[i + 1];
+  const chosen = side === 0 ? left : right;
+
+  // Record winner
+  winners[currentPair] = chosen;
+
+  bracketLog.push({
+    round: roundNum,
+    pair: currentPair,
+    left, right,
+    picked: chosen
+  });
+
+  // Advance
+  setTimeout(() => {
+    currentPair++;
+    if (currentPair >= winners.length) {
+      // Round complete → auto-advance
+      currentItems = winners.filter(w => w !== null);
+      // Only 1 item left = champion
+      if (currentItems.length <= 1) {
+        render();
+        return;
+      }
+      // Setup next round
+      winners = new Array(Math.floor(currentItems.length / 2)).fill(null);
+      currentPair = 0;
+      roundNum++;
+      render();
+    } else {
+      render();
+    }
+  }, 400);
+}
+
+// ===================== CHAMPION =====================
+function renderChampion(champion) {
+  let historyHtml = '';
+  bracketLog.forEach(b => {
+    const rName = b.round === 0 ? '初赛' : `第${b.round + 1}轮`;
+    historyHtml += `<div>${rName}｜${b.left} <b style="color:var(--accent)">VS</b> ${b.right} → <b style="color:var(--accent2)">${b.picked}</b></div>`;
+  });
+
+  app.innerHTML = `
+    <div class="champion-screen">
+      <div class="champion-card">
+        <div class="crown">👑</div>
+        <div class="champion-name">${champion}</div>
+        <div class="champion-label">🏆 你的终极XP</div>
+      </div>
+      <p style="color:var(--sub);margin:8px 0 16px">
+        历经 ${bracketLog.length} 次抉择，从 32 个XP中脱颖而出
+      </p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="initGame()">再来一局</button>
+        <button class="btn btn-secondary" onclick="showBracket()">查看对决记录</button>
+      </div>
+      <div class="bracket-history" id="bracket-detail" style="display:none">
+        ${historyHtml}
+      </div>
+    </div>
+  `;
+
+  spawnConfetti();
+}
+
+function showBracket() {
+  const el = document.getElementById('bracket-detail');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+// ===================== CONFETTI =====================
+function spawnConfetti() {
+  const colors = ['#9333ea','#db2777','#f472b6','#c084fc','#e879f9','#facc15','#818cf8'];
+  for (let i = 0; i < 60; i++) {
+    setTimeout(() => {
+      const c = document.createElement('div');
+      c.style.cssText = `
+        position: fixed; left: ${Math.random() * 100}vw; top: -20px;
+        width: ${6 + Math.random() * 10}px; height: ${6 + Math.random() * 10}px;
+        background: ${colors[Math.floor(Math.random() * colors.length)]};
+        border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+        pointer-events: none; z-index: 999;
+        animation: confettiFall ${2 + Math.random() * 3}s ease-out forwards;
+        animation-delay: ${Math.random() * 0.5}s;
+      `;
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 4000);
+    }, i * 30);
+  }
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes confettiFall {
+      0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(${360 + Math.random() * 720}deg) scale(0.3); opacity: 0; }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+// ===================== KEYBOARD =====================
+document.addEventListener('keydown', e => {
+  if ((e.key === 'ArrowLeft' || e.key === 'a') && winners[currentPair] === null) {
+    pick(0);
+  }
+  if ((e.key === 'ArrowRight' || e.key === 'd') && winners[currentPair] === null) {
+    pick(1);
+  }
+});
+
+// ===================== INIT =====================
+initGame();
+</script>
 </body>
 </html>
