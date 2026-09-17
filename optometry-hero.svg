@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" role="img" aria-label="眼视光插画：眼镜、眼睛与视力表">
+  <defs>
+    <!-- 主渐变：与站点标题渐变一致 紫 #bd34fe → 青蓝 #41d1ff -->
+    <linearGradient id="grad-frame" gradientUnits="userSpaceOnUse" x1="70" y1="90" x2="450" y2="430">
+      <stop offset="0" stop-color="#bd34fe"/>
+      <stop offset="1" stop-color="#41d1ff"/>
+    </linearGradient>
+    <!-- 虹膜径向渐变：内亮青 → 外紫 -->
+    <radialGradient id="grad-iris" gradientUnits="userSpaceOnUse" cx="152" cy="262" r="46">
+      <stop offset="0" stop-color="#9beaff"/>
+      <stop offset=".55" stop-color="#41d1ff"/>
+      <stop offset="1" stop-color="#a626f5"/>
+    </radialGradient>
+    <!-- 眼形裁剪：让虹膜像真实眼睛一样被上下眼睑遮住边缘 -->
+    <clipPath id="clip-eye">
+      <path d="M 92 268 Q 152 190 212 268 Q 152 318 92 268 Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- 外围装饰虚线弧（左上 / 右下 呼应） -->
+  <path d="M 58 152 A 190 190 0 0 1 152 58" stroke="#41d1ff" stroke-opacity=".35" stroke-width="4" stroke-linecap="round" stroke-dasharray="1 14"/>
+  <path d="M 454 360 A 190 190 0 0 1 360 454" stroke="#bd34fe" stroke-opacity=".35" stroke-width="4" stroke-linecap="round" stroke-dasharray="1 14"/>
+
+  <!-- 镜腿（左右） -->
+  <path d="M 56 254 C 38 248 26 240 12 232" stroke="url(#grad-frame)" stroke-width="16" stroke-linecap="round"/>
+  <path d="M 456 254 C 474 248 486 240 500 232" stroke="url(#grad-frame)" stroke-width="16" stroke-linecap="round"/>
+
+  <!-- 鼻梁桥（上拱弧） -->
+  <path d="M 230 214 C 244 178 268 178 282 214" stroke="url(#grad-frame)" stroke-width="16" stroke-linecap="round"/>
+
+  <!-- 镜片淡填充 -->
+  <circle cx="152" cy="258" r="94" fill="#41d1ff" fill-opacity=".07"/>
+  <circle cx="360" cy="258" r="94" fill="#41d1ff" fill-opacity=".07"/>
+
+  <!-- 左镜片：眼睛（杏眼 + 虹膜 + 瞳孔 + 高光 + 睫毛） -->
+  <path d="M 92 268 Q 152 190 212 268 Q 152 318 92 268 Z" fill="#ffffff" stroke="url(#grad-frame)" stroke-width="10" stroke-linejoin="round"/>
+  <g clip-path="url(#clip-eye)">
+    <circle cx="152" cy="262" r="40" fill="url(#grad-iris)"/>
+    <circle cx="152" cy="262" r="17" fill="#160b2e"/>
+    <circle cx="165" cy="249" r="8.5" fill="#ffffff" fill-opacity=".95"/>
+    <circle cx="141" cy="273" r="3.5" fill="#ffffff" fill-opacity=".7"/>
+  </g>
+  <path d="M 170 224 L 181 209" stroke="url(#grad-frame)" stroke-width="7" stroke-linecap="round"/>
+  <path d="M 186 236 L 199 224" stroke="url(#grad-frame)" stroke-width="7" stroke-linecap="round"/>
+  <path d="M 199 251 L 214 242" stroke="url(#grad-frame)" stroke-width="7" stroke-linecap="round"/>
+
+  <!-- 右镜片：视力表 E（Snellen 字母） -->
+  <path d="M 322 214 L 398 214 M 322 258 L 384 258 M 322 302 L 398 302 M 322 214 L 322 302" stroke="url(#grad-frame)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- 镜片反光弧 -->
+  <path d="M 402 196 Q 432 244 414 306" stroke="#ffffff" stroke-opacity=".45" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- 十字星光点缀 -->
+  <path d="M 78 116 Q 82 126 92 130 Q 82 134 78 144 Q 74 134 64 130 Q 74 126 78 116 Z" fill="#41d1ff" fill-opacity=".9"/>
+  <path d="M 444 348 Q 449 361 462 366 Q 449 371 444 384 Q 439 371 426 366 Q 439 361 444 348 Z" fill="#bd34fe" fill-opacity=".85"/>
+  <path d="M 424 109 Q 427 115 433 118 Q 427 121 424 127 Q 421 121 415 118 Q 421 115 424 109 Z" fill="#41d1ff" fill-opacity=".7"/>
+
+  <!-- 散落圆点 -->
+  <circle cx="60" cy="384" r="5" fill="#bd34fe" fill-opacity=".5"/>
+  <circle cx="470" cy="212" r="4" fill="#41d1ff" fill-opacity=".6"/>
+  <circle cx="108" cy="424" r="3.5" fill="#41d1ff" fill-opacity=".5"/>
+  <circle cx="392" cy="64" r="5" fill="#bd34fe" fill-opacity=".45"/>
+  <circle cx="256" cy="470" r="4" fill="#41d1ff" fill-opacity=".4"/>
+</svg>

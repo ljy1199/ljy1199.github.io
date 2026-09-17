@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>远点与影动 · 检影动向原理演示动画</title>
+<style>
+:root{
+  --ink:#22313A; --ink2:#5E7078; --line:#D5E2E5; --bg:#F7FAFB; --card:#FFF;
+  --teal:#1E8FA0; --teal-d:#116D7C; --teal-bg:#E4F4F6;
+  --blue:#3B7DD8; --blue-bg:#E8F1FC;
+  --amber:#E8963C; --amber-bg:#FCF0DF;
+  --green:#3B9E5F; --green-bg:#E7F5EC;
+  --red:#D2543F; --red-bg:#FBEAE6;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:"PingFang SC","Microsoft YaHei",sans-serif;padding:22px 18px 50px}
+.wrap{max-width:1120px;margin:0 auto}
+h1{font-size:21px;font-weight:600;margin-bottom:4px}
+.sub{font-size:12.5px;color:var(--ink2);margin-bottom:16px}
+
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 18px;margin-bottom:14px}
+svg text{font-family:"PingFang SC","Microsoft YaHei",sans-serif}
+
+/* 控制区 */
+.controls{display:flex;flex-wrap:wrap;gap:26px;align-items:center}
+.ctrl{display:flex;flex-direction:column;gap:7px;min-width:300px;flex:1}
+.ctrl label{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px}
+.ctrl label .val{font-weight:400;color:var(--teal-d);background:var(--teal-bg);border-radius:6px;padding:1px 10px;font-size:12.5px}
+.ctrl label .val.warn{color:var(--amber);background:var(--amber-bg)}
+input[type=range]{width:100%;accent-color:var(--teal);cursor:pointer}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:12px;border:1px solid var(--line);background:#fff;border-radius:14px;padding:3px 12px;cursor:pointer;color:var(--ink2);transition:all .15s}
+.chip:hover{border-color:var(--teal);color:var(--teal-d)}
+.chip.on{background:var(--teal);border-color:var(--teal);color:#fff}
+.toggles{display:flex;align-items:center;gap:16px;padding-top:18px}
+.tg{display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;user-select:none}
+.btns{display:flex;gap:8px;margin-left:auto}
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:7px 16px;font-size:13px;cursor:pointer;color:var(--ink)}
+.btn:hover{border-color:var(--teal);color:var(--teal-d)}
+.btn.primary{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:600}
+.btn.primary:hover{background:var(--teal-d)}
+
+/* 结论卡 */
+.cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.card{border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:#fff}
+.card h3{font-size:13px;color:var(--ink2);font-weight:600;margin-bottom:8px}
+.badge{display:inline-block;font-size:19px;font-weight:600;border-radius:10px;padding:7px 20px;margin-bottom:8px}
+.badge.shun{background:var(--green-bg);color:var(--green)}
+.badge.ni{background:var(--red-bg);color:var(--red)}
+.badge.zhong{background:var(--blue-bg);color:var(--blue)}
+.card .act{font-size:13.5px;line-height:1.7}
+.card .act b{font-weight:600}
+.kv{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px dashed var(--line)}
+.kv:last-child{border-bottom:none}
+.kv b{font-weight:600;color:var(--teal-d)}
+.rule{font-size:12.5px;line-height:1.9}
+.rule li{margin:3px 0 3px 18px}
+.rule .hl{background:var(--amber-bg);border-radius:4px;padding:0 4px}
+.verify{margin-top:8px;font-size:12.5px;color:var(--blue);background:var(--blue-bg);border-radius:8px;padding:7px 10px;line-height:1.7}
+.hidden{display:none}
+.hint{font-size:12.5px;color:var(--ink2);margin-top:10px;line-height:1.8}
+.hint b{color:var(--teal-d)}
+@media (max-width:900px){.cards{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>映光动向原理 · 远点位置决定影动方向</h1>
+  <div class="sub">客观验光（二）检影验光 · 光学原理互动演示 —— 拖动两个滑块，看远点与观察站的位置关系如何决定「顺动 / 逆动 / 中和」</div>
+
+  <!-- 主舞台 -->
+  <div class="panel">
+    <svg id="stage" viewBox="0 0 1060 400" width="100%" role="img" aria-label="检影动向原理示意图">
+      <defs>
+        <pattern id="grid" width="22" height="22" patternUnits="userSpaceOnUse">
+          <path d="M22 0H0V22" fill="none" stroke="#E3EEF1" stroke-width="1"/>
+        </pattern>
+        <radialGradient id="glowG"><stop offset="0%" stop-color="#FFE9A8"/><stop offset="100%" stop-color="#FFE9A8" stop-opacity="0"/></radialGradient>
+        <marker id="arrB" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="#5E7078" stroke-width="1.5" stroke-linecap="round"/>
+        </marker>
+      </defs>
+      <rect x="0" y="0" width="1060" height="400" fill="url(#grid)" rx="10"/>
+
+      <!-- 光轴 -->
+      <line x1="60" y1="300" x2="1010" y2="300" stroke="#B9CDD3" stroke-width="1.5" stroke-dasharray="6 5"/>
+
+      <!-- 距离标尺 -->
+      <g id="ruler" font-size="11" fill="#7d929b">
+        <line x1="160" y1="352" x2="760" y2="352" stroke="#C7D8DD" stroke-width="1"/>
+        <g id="ticks"></g>
+      </g>
+
+      <!-- 观察站（检查者） -->
+      <g id="observer">
+        <g id="obsIcon">
+          <!-- 检影镜 -->
+          <g transform="translate(-30,-6) rotate(-28)">
+            <rect x="0" y="0" width="9" height="34" rx="4" fill="#4A5459"/>
+            <rect x="2.5" y="-16" width="4" height="18" rx="2" fill="#C9CFD3"/>
+            <rect x="-1" y="-24" width="11" height="10" rx="3" fill="#39424A"/>
+            <circle cx="4.5" cy="-26.5" r="4" fill="#E8B34B"/>
+          </g>
+          <!-- 检查者眼睛 -->
+          <path d="M-26 -4 Q-14 -18 0 -4 Q-14 10 -26 -4 Z" fill="#fff" stroke="#39424A" stroke-width="2"/>
+          <circle id="obsPupil" cx="-13" cy="-4" r="5.5" fill="#2E3B44"/>
+          <circle id="peepholeGlow" cx="-13" cy="-4" r="9" fill="url(#glowG)" opacity="0"/>
+        </g>
+        <text id="obsLabel" x="0" y="34" text-anchor="middle" font-size="12" fill="#39424A" font-weight="600">观察站 100cm</text>
+      </g>
+
+      <!-- 远点标记 -->
+      <g id="farPoint">
+        <line id="fpLine" x1="0" y1="252" x2="0" y2="348" stroke="#E8963C" stroke-width="2" stroke-dasharray="5 4"/>
+        <circle id="fpDot" cx="0" cy="300" r="6" fill="#E8963C"/>
+        <text id="fpLabel" x="0" y="238" text-anchor="middle" font-size="12.5" fill="#B0650F" font-weight="600">远点</text>
+      </g>
+
+      <!-- 被检眼 -->
+      <g id="eye">
+        <!-- 巩膜 -->
+        <circle cx="840" cy="300" r="58" fill="#FDFEFF" stroke="#9FB6BE" stroke-width="2"/>
+        <!-- 角膜隆起 -->
+        <path d="M786 272 Q768 300 786 328" fill="none" stroke="#9FB6BE" stroke-width="2"/>
+        <!-- 虹膜/瞳孔（在角膜处） -->
+        <rect id="pupilWell" x="776" y="268" width="20" height="64" fill="#DCEAF0"/>
+        <rect id="pupilOpen" x="776" y="272" width="20" height="56" fill="#22313A"/>
+        <!-- 中和满瞳光 -->
+        <rect id="pupilNeutral" x="776" y="272" width="20" height="56" fill="#FFE9A8" opacity="0"/>
+        <!-- 瞳孔内影动光斑 -->
+        <ellipse id="reflexSpot" cx="786" cy="300" rx="7" ry="9" fill="#FFD65C" opacity="0"/>
+        <!-- 晶状体 -->
+        <ellipse cx="812" cy="300" rx="10" ry="20" fill="none" stroke="#B9CDD3" stroke-width="2"/>
+        <!-- 视网膜（右侧内壁） -->
+        <path d="M872 254 Q898 300 872 346" fill="none" stroke="#9FB6BE" stroke-width="2"/>
+        <!-- 视网膜光斑（被照亮的部位） -->
+        <circle id="retGlow" cx="874" cy="300" r="6" fill="#FFD65C"/>
+        <circle id="retGlowHalo" cx="874" cy="300" r="13" fill="url(#glowG)"/>
+        <text x="840" y="382" text-anchor="middle" font-size="12.5" fill="#5E7078" font-weight="600">被检眼</text>
+        <!-- 入射光带（扫动的光） -->
+        <rect id="streak" x="770" y="293" width="34" height="12" rx="5" fill="#FFD65C" opacity=".9"/>
+      </g>
+
+      <!-- 光路 -->
+      <g id="rays" fill="none" stroke-linecap="round">
+        <path id="ray1" stroke="#7FB7C4" stroke-width="1.4" opacity=".85"/>
+        <path id="ray2" stroke="#7FB7C4" stroke-width="1.4" opacity=".85"/>
+        <path id="ray3" stroke="#7FB7C4" stroke-width="1.4" opacity=".85"/>
+        <path id="rayHi" stroke="#F0A72E" stroke-width="2.4"/>
+        <g id="virtExt" opacity=".55">
+          <path id="vext1" stroke="#E8963C" stroke-width="1.2" stroke-dasharray="4 4"/>
+          <path id="vext2" stroke="#E8963C" stroke-width="1.2" stroke-dasharray="4 4"/>
+          <path id="vext3" stroke="#E8963C" stroke-width="1.2" stroke-dasharray="4 4"/>
+        </g>
+      </g>
+
+      <!-- 瞳孔放大镜 -->
+      <g id="magnifier" transform="translate(890,88)">
+        <circle cx="0" cy="0" r="62" fill="#fff" stroke="#B9CDD3" stroke-width="2"/>
+        <clipPath id="mclip"><circle cx="0" cy="0" r="60"/></clipPath>
+        <g clip-path="url(#mclip)">
+          <circle cx="0" cy="0" r="60" fill="#3E6FB0"/>
+          <circle cx="0" cy="0" r="34" fill="#1A2732"/>
+          <line x1="-60" y1="0" x2="60" y2="0" stroke="#8CA6C9" stroke-width="1" stroke-dasharray="3 4" opacity=".75"/>
+          <rect id="mStreak" x="-40" y="-7" width="80" height="14" fill="#FFD65C" opacity=".95"/>
+          <circle id="mNeutral" cx="0" cy="0" r="34" fill="#FFE9A8" opacity="0"/>
+          <rect id="mReflex" x="-40" y="-6" width="80" height="12" rx="5" fill="#FFF3C9"/>
+        </g>
+        <text x="0" y="84" text-anchor="middle" font-size="12.5" fill="#5E7078" font-weight="600">瞳孔内所见（放大）</text>
+        <text id="mNeutralHint" x="0" y="101" text-anchor="middle" font-size="11" fill="#8a6510" font-weight="600" opacity="0">全瞳同时亮灭 · 无方向</text>
+        <!-- 方向箭头 -->
+        <g font-size="11.5" fill="#39424A" font-weight="600">
+          <g id="arrStreak" transform="translate(-92,0)">
+            <path id="arrStreakP" d="M0 8 L0 -8" stroke="#B8860B" stroke-width="2" fill="none" marker-end="url(#arrB)"/>
+            <text x="0" y="26" text-anchor="middle" fill="#8a6510">光带</text>
+          </g>
+          <g id="arrReflex" transform="translate(92,0)">
+            <path id="arrReflexP" d="M0 8 L0 -8" stroke="#1E8FA0" stroke-width="2" fill="none" marker-end="url(#arrB)"/>
+            <text id="arrReflexT" x="0" y="26" text-anchor="middle" fill="#116D7C">影动</text>
+          </g>
+        </g>
+      </g>
+
+      <!-- 标题小字 -->
+      <text x="70" y="40" font-size="14.5" fill="#22313A" font-weight="600">远点 × 观察站 → 决定影动</text>
+      <text x="70" y="62" font-size="11.5" fill="#7d929b">远点在观察站之外 → 顺动 ｜ 远点恰在观察站 → 中和 ｜ 远点在观察站之内 → 逆动</text>
+      <text id="infNote" x="70" y="82" font-size="11.5" fill="#8a6510" font-weight="600" display="none">无穷远模式：横轴按屈光度压缩示意，观察站置于左端 ∞ —— 远点始终在观察者右侧（光线先交叉再到检查者）→ 近视必为逆动</text>
+    </svg>
+  </div>
+
+  <!-- 控制台 -->
+  <div class="panel">
+    <div class="controls">
+      <div class="ctrl">
+        <label>被检眼屈光状态 <span class="val" id="powerVal">近视 -1.00 D</span></label>
+        <input type="range" id="power" min="-32" max="32" value="-4" step="1">
+        <div class="chips" id="powerChips"></div>
+      </div>
+      <div class="ctrl">
+        <label>观察站（检查距离） <span class="val" id="distVal">100 cm</span></label>
+        <input type="range" id="dist" min="25" max="140" value="100" step="1">
+        <div class="chips" id="distChips"></div>
+      </div>
+      <div class="toggles">
+        <label class="tg"><input type="checkbox" id="infMode"> 无穷远（理想状态）</label>
+        <label class="tg"><input type="checkbox" id="showRays" checked> 显示光路</label>
+        <label class="tg">扫动速度 <input type="range" id="speed" min="20" max="200" value="100" step="5" style="width:110px"></label>
+        <div class="btns">
+          <button class="btn primary" id="btnPlay">暂停扫动</button>
+          <button class="btn" id="btnOnce">单次扫动</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 结论区 -->
+  <div class="cards">
+    <div class="card">
+      <h3>当前位置关系</h3>
+      <div class="kv"><span>被检眼屈光</span><b id="kvPower">-1.00 D 近视</b></div>
+      <div class="kv"><span>远点位置</span><b id="kvFar">眼前 100 cm</b></div>
+      <div class="kv"><span>观察站距离</span><b id="kvDist">100 cm</b></div>
+      <div class="kv"><span>人工近视（-1/d）</span><b id="kvAmino">-1.00 D</b></div>
+    </div>
+    <div class="card">
+      <h3>判读结果</h3>
+      <div id="badge" class="badge zhong">中和</div>
+      <div class="act" id="actText"><b>影动不动，满瞳映光。</b><br>远点恰好落在观察站上，视网膜与检查者入瞳共轭。</div>
+      <div class="verify hidden" id="verifyBox">✔ 验证中和：① 平凹互换 ② 前后移动（近顺远逆）③ 过矫法</div>
+    </div>
+    <div class="card">
+      <h3>记忆口诀</h3>
+      <ul class="rule">
+        <li>远点在<span class="hl">观察站之外</span>（更远）→ <b style="color:var(--green)">顺动</b> → 加<b>正</b>镜片</li>
+        <li>远点<span class="hl">恰在观察站</span> → <b style="color:var(--blue)">中和</b> → 全瞳同时亮灭（闪烁），无方向</li>
+        <li>远点在<span class="hl">观察站之内</span>（更近）→ <b style="color:var(--red)">逆动</b> → 加<b>负</b>镜片</li>
+        <li>远视、正视：远点在无穷远或眼后 → 永远在观察站之外 → 顺动</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="hint">
+    <b>课堂用法：</b>先勾选「无穷远（理想状态）」复现课本三种情况（正视不动、远视顺动、近视逆动）；再取消勾选，把观察站放到 100cm，依次点度数快捷按钮 —— 学生会亲眼看到 <b>-1.00D 恰好中和</b>（人工近视的由来）、-0.75D 顺动、-2.00D 逆动。
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id);};
+
+/* ---------- 几何常量 ---------- */
+var AXIS_Y=300, EYE_X=780, PUPIL_R=28, PXCM=5.0;   // 眼瞳孔平面 x，每厘米像素
+var RET_X=874;                                      // 视网膜光斑 x
+
+/* ---------- 状态 ---------- */
+var power=-1.00;         // D，负=近视 正=远视 0=正视
+var distCm=100;          // 观察站距离，null=无穷远
+var playing=true, onceMode=false, phase=0, speed=1.0, dirSweep=1, lastT=0;
+
+/* ---------- 控件 ---------- */
+var powerChips=[["正视",0],["-0.50",-0.5],["-0.75",-0.75],["-1.00",-1],["-1.50",-1.5],["-2.00",-2],["+2.00",2],["+4.00",4]];
+var distChips=[["50cm",50],["67cm",67],["100cm",100]];
+
+function buildChips(list, el, apply){
+  list.forEach(function(c){
+    var b=document.createElement("button");
+    b.className="chip"; b.textContent=c[0];
+    b.onclick=function(){ apply(c[1]); };
+    el.appendChild(b);
+  });
+}
+buildChips(powerChips, $("powerChips"), function(v){ setPower(v); });
+buildChips(distChips, $("distChips"), function(v){ setDist(v); });
+
+function refreshChips(){
+  var chips=document.querySelectorAll("#powerChips .chip");
+  var list=powerChips;
+  chips.forEach(function(b,i){ b.classList.toggle("on", list[i][1]===power); });
+  chips=document.querySelectorAll("#distChips .chip");
+  chips.forEach(function(b,i){ b.classList.toggle("on", !infMode.checked && list[i][1]===distCm); });
+}
+
+function setPower(v){
+  power=v; $("power").value=Math.round(v*4);
+  sync();
+}
+function setDist(v){
+  distCm=v; infMode.checked=false; $("dist").value=v;
+  sync();
+}
+$("power").oninput=function(){ power=this.value/4; sync(); };
+$("dist").oninput=function(){ distCm=+this.value; infMode.checked=false; sync(); };
+$("infMode").onchange=function(){ sync(); };
+$("showRays").onchange=function(){ $("rays").style.display=this.checked?"":"none"; };
+$("btnPlay").onclick=function(){
+  playing=!playing;
+  this.textContent=playing?"暂停扫动":"继续扫动";
+  if(playing&&onceMode){onceMode=false;}
+};
+$("btnOnce").onclick=function(){ phase=0; dirSweep=1; onceMode=true; playing=true; $("btnPlay").textContent="暂停扫动"; };
+$("speed").oninput=function(){ speed=this.value/100; };
+
+/* ---------- 光学计算 ---------- */
+function compute(){
+  var d=distCm/100;                       // m
+  var amino = infMode.checked ? 0 : -1/d; // 人工近视
+  var aCm;                                // 远点距离（眼前 cm）
+  if(power===0) aCm=Infinity;
+  else if(power<0) aCm=100/(-power);
+  else aCm=null;                          // 远视：虚性，眼后
+  var aOpt;                                // 远点距离(cm)：正=眼前实性，负=眼后虚性，∞=正视
+  if(power===0) aOpt=Infinity;
+  else if(power<0) aOpt=100/(-power);
+  else aOpt=-(100/power);                  // 远视：远点在眼后，取负
+  var mv;                                  // shun / ni / zhong
+  if(infMode.checked){
+    mv = power<0 ? "ni" : (power===0 ? "zhong" : "shun");
+  }else{
+    if(power>=0) mv="shun";
+    else{
+      var diff=aCm-distCm;
+      mv = diff>1.5 ? "shun" : (diff<-1.5 ? "ni" : "zhong");
+    }
+  }
+  return {d:d, amino:amino, aCm:aCm, aOpt:aOpt, mv:mv};
+}
+
+/* ---------- 渲染 ---------- */
+function sync(){
+  var c=compute();
+  /* 控件文字 */
+  var pw = power===0?"正视":(power<0?"近视 ":"远视 +")+power.toFixed(2)+" D";
+  $("powerVal").textContent = power===0?"正视 0.00 D":(power<0?"近视 "+power.toFixed(2)+" D":"远视 +"+power.toFixed(2)+" D");
+  $("distVal").textContent = infMode.checked?"无穷远 ∞":distCm+" cm";
+  $("kvPower").textContent = pw;
+  $("kvDist").textContent = infMode.checked?"无穷远 ∞":distCm+" cm";
+  $("kvAmino").textContent = c.amino===0?"0.00 D（无穷远）":c.amino.toFixed(2)+" D";
+  $("kvFar").textContent = power===0?"无穷远":(power<0?("眼前 "+c.aCm.toFixed(1)+" cm"):"眼后（虚性远点）");
+
+  /* 结论卡 */
+  var badge=$("badge"), act=$("actText");
+  if(c.mv==="shun"){
+    badge.className="badge shun"; badge.textContent="顺 动";
+    act.innerHTML="<b>影动与光带同向移动。</b><br>远点在观察站<b>之外</b>（更远处），应<b style='color:var(--green)'>加正镜片（+）</b>消解顺动。";
+    $("verifyBox").classList.add("hidden");
+  }else if(c.mv==="ni"){
+    badge.className="badge ni"; badge.textContent="逆 动";
+    act.innerHTML="<b>影动与光带反向移动。</b><br>远点在观察站<b>之内</b>（更近处），应<b style='color:var(--red)'>加负镜片（−）</b>消解逆动。";
+    $("verifyBox").classList.add("hidden");
+  }else{
+    badge.className="badge zhong"; badge.textContent="中 和";
+    act.innerHTML="<b>全瞳同时亮灭（闪烁），看不出移动方向。</b><br>远点恰好落在观察站上，被检眼眼底与检查者入瞳共轭——注意是「闪」不是「不动的静止」：光带离开瞳孔时全瞳会瞬间变暗。";
+    $("verifyBox").classList.remove("hidden");
+  }
+  refreshChips();
+  drawStatic(c);
+}
+
+function xOfDist(cm){ return EYE_X - cm*PXCM; }
+/* 光线真正的会聚点（可能出画，交给 viewBox 裁掉，保证光线与影动光斑同源） */
+function xFtrue(c){
+  if(power===0) return -1e5;
+  if(power>0)   return EYE_X+170;
+  return EYE_X - c.aCm*PXCM;
+}
+/* 远点的"绘制"位置（仅供画图，光学计算一律用 sampleY 的真实距离）
+   注意：这里不能再反过来影响影动方向，否则低度近视会被夹紧成顺动 */
+function xOfFar(c){
+  if(power===0) return -1e5;                            // 正视：无穷远
+  if(power>0)   return EYE_X+170;                       // 远视：眼后虚点
+  if(infMode.checked) return 106 + 674/(1+c.aCm/100);   // 无穷远模式：横轴按屈光度压缩，远点必在观察者右侧
+  return Math.max(Math.min(xFtrue(c), 762), 24);        // 有限距离：真实位置，出画则贴边
+}
+
+function drawStatic(c){
+  /* 观察站位置 */
+  var xo = infMode.checked ? 60 : xOfDist(distCm);
+  $("observer").setAttribute("transform","translate("+xo+","+AXIS_Y+")");
+  $("obsLabel").textContent = infMode.checked ? "观察站 ∞（理想）" : ("观察站 "+distCm+"cm");
+  $("obsLabel").setAttribute("x", infMode.checked?52:0);
+  $("obsLabel").setAttribute("y", infMode.checked?-40:34);
+  /* 观察站图标在无穷远时右移一点避免出界 */
+  $("obsIcon").setAttribute("transform", infMode.checked?"translate(46,0)":"translate(0,0)");
+
+  /* 远点标记 */
+  if(power===0){
+    $("farPoint").style.display="none";
+  }else{
+    $("farPoint").style.display="";
+    var fx=xOfFar(c);
+    var virtual = power>0;
+    var off = !virtual && !infMode.checked && xOfDist(c.aCm) < 24;   // 远点已跑出画面左侧
+    $("fpLine").setAttribute("x1",fx); $("fpLine").setAttribute("x2",fx);
+    $("fpDot").setAttribute("cx",fx);
+    $("fpDot").setAttribute("fill", virtual?"#E8963C":"#E8963C");
+    $("fpDot").setAttribute("stroke", virtual?"#fff":"none");
+    $("fpDot").setAttribute("stroke-width", virtual?2:0);
+    $("fpLabel").setAttribute("x", fx);
+    $("fpLabel").textContent = virtual ? "远点（眼后·虚）"
+      : ("远点 "+c.aCm.toFixed(0)+"cm" + (off?" ↤出画":""));
+    $("fpLabel").setAttribute("text-anchor", "middle");
+  }
+
+  /* 无穷远模式下横轴是压缩示意，隐藏真实刻度尺 */
+  $("ticks").style.display = infMode.checked ? "none" : "";
+  $("infNote").style.display = infMode.checked ? "" : "none";
+
+  /* 标尺刻度 */
+  var tg=$("ticks"); tg.innerHTML="";
+  [50,67,100,140].forEach(function(cm){
+    var x=xOfDist(cm);
+    tg.innerHTML+='<line x1="'+x+'" y1="348" x2="'+x+'" y2="356" stroke="#C7D8DD"/>'+
+      '<text x="'+x+'" y="370" text-anchor="middle">'+cm+'</text>';
+  });
+  tg.innerHTML+='<text x="'+(EYE_X)+'" y="370" text-anchor="middle" fill="#39424A" font-weight="600">0（被检眼）</text>';
+  tg.innerHTML+='<text x="70" y="370" text-anchor="middle">← 更远 / ∞</text>';
+}
+
+/* ---------- 帧动画 ---------- */
+function frame(t){
+  if(!lastT) lastT=t;                     // 首帧避免时间跳变
+  var dt=(t-lastT)/1000; lastT=t;
+  if(dt>0.25) dt=0.25;                    // 切后台回来时不跳帧
+  if(playing){
+    phase += dt*0.9*speed;
+    while(phase>=1){
+      if(onceMode){ playing=false; onceMode=false; $("btnPlay").textContent="继续扫动"; phase=0.999; break; }
+      phase-=1;
+    }
+  }
+  var s = Math.sin(phase*Math.PI*2);      // -1..1，>0 表示光带在上侧
+  var v = Math.cos(phase*Math.PI*2);      // 扫动速度方向
+  try{ render(s,v); }
+  catch(e){ if(!window.__shown){ window.__shown=1; console.error("绘制异常：",e); } }
+  requestAnimationFrame(frame);           // 即便出错也继续走帧，避免整页卡死
+}
+
+/* 采样光线：远点面像 Q 与窥孔的连线交瞳孔面于何处（决定影动光斑位置） */
+/* 影动光斑位于瞳孔面的高度：y_p = q·d/(d−a)
+   （q=远点面像偏移，d=观察站距离，a=远点距离：正=眼前实性，负=眼后虚性）
+   用真实距离解析计算，不受画图时的坐标夹紧影响；d→∞ 时系数→1。 */
+function sampleY(c, qY){
+  var qo = qY - AXIS_Y;                    // 远点面像相对光轴的偏移（屏幕向下为正）
+  if(power===0){                           // 正视：出射平行光，由"哪条光线进窥孔"决定
+    var xo = infMode.checked ? 106 : xOfDist(distCm);
+    var m0=(c.retY-AXIS_Y)/(RET_X-780);
+    return AXIS_Y - m0*(xo-780);
+  }
+  var a = c.aOpt;
+  var d = infMode.checked ? Infinity : distCm;
+  var k = (d===Infinity) ? 1 : d/(d-a);    // a>d → k<0（顺动）；a<d → k>0（逆动）；d=∞ → 1
+  return AXIS_Y + qo*k;
+}
+function soft(d, max){ return max*Math.tanh(d/max); }   /* 平滑压缩到瞳孔内 */
+
+var lastK=1;                                       /* 影动随扫动的比例，供箭头使用 */
+
+function render(s,v){
+  var c=compute();
+  var g=17;                                        // 光斑振幅 px
+  var streakY = AXIS_Y - s*40;                     // 入射光带（s>0 在上）
+  var retY    = AXIS_Y - s*g;                      // 被照亮的视网膜部位：与光带同向
+  var qY      = AXIS_Y + (power>0?-1:1)*s*g;       // 远点面像：远视正立（同向），近视/正视倒立（反向）
+  c.retY=retY;
+
+  /* 光带 & 视网膜光斑 */
+  var st=$("streak"); st.setAttribute("y", streakY-6); st.setAttribute("opacity",.9);
+  $("retGlow").setAttribute("cy",retY); $("retGlowHalo").setAttribute("cy",retY);
+
+  var spot=$("reflexSpot"), mReflex=$("mReflex"), mStreak=$("mStreak");
+  mStreak.setAttribute("y", -7 - s*30);            // 放大图里的光带
+
+  /* 影动位移（向下为正） */
+  var dy = sampleY(c,qY) - AXIS_Y;
+  if(Math.abs(s)>0.12) lastK = -(dy/s);            // dy = -k·s
+  var vs = Math.abs(v)<.08 ? 0 : (v>0?1:-1);       // 光带方向：v>0 → 上移
+
+  if(c.mv==="zhong"){
+    /* 中和：视网膜与检查者入瞳共轭，光带照到瞳孔的瞬间全瞳一起亮、离开时全瞳一起灭
+       —— 所以看不到"移动"，只看到满瞳闪烁。亮度随光带与瞳孔的重叠程度变化。 */
+    var over = (34 - Math.abs(s)*40)/12;              // 光带与瞳孔重叠程度
+    var bright = over<0?0:(over>1?1:over);
+    spot.setAttribute("opacity",0);
+    $("pupilNeutral").setAttribute("opacity", (0.10+0.82*bright).toFixed(3));
+    $("mNeutral").setAttribute("opacity", (0.95*bright).toFixed(3));
+    $("mNeutralHint").setAttribute("opacity", 1);
+    mReflex.setAttribute("y",-6); mReflex.setAttribute("opacity",0);
+    setArrow("arrStreakP", vs);
+    setArrow("arrReflexP", 0);
+    $("arrReflexT").textContent="不动";
+    window.__zhongBright=bright;                      // 供窥孔亮度使用
+  }else{
+    $("pupilNeutral").setAttribute("opacity",0);
+    $("mNeutral").setAttribute("opacity",0);
+    $("mNeutralHint").setAttribute("opacity",0);
+    spot.setAttribute("cy", AXIS_Y + soft(dy,22)); spot.setAttribute("opacity",.95);
+    mReflex.setAttribute("y", -6 + soft(dy*1.35,30));
+    mReflex.setAttribute("opacity",.9);
+    setArrow("arrStreakP", vs);
+    setArrow("arrReflexP", (lastK*v>0) ? 1 : -1);
+    $("arrReflexT").textContent = (dy*s<0) ? "顺动" : "逆动";
+  }
+
+  /* 光路 */
+  if($("showRays").checked) drawRays(c, s, retY, qY);
+}
+
+function setArrow(id, dir){
+  var p=$(id);
+  if(dir===0){ p.setAttribute("opacity",0); return; }
+  p.setAttribute("opacity",1);
+  if(dir>0) p.setAttribute("d","M0 10 L0 -8");
+  else      p.setAttribute("d","M0 -10 L0 8");
+}
+
+function rayPath(x1,y1,x2,y2,x3,y3){
+  return "M"+x1+" "+y1+" L"+x2+" "+y2+" L"+x3+" "+y3;
+}
+
+function drawRays(c, s, retY, qY){
+  var xo = infMode.checked ? 106 : xOfDist(distCm);
+  var xF = power===0 ? null : (infMode.checked ? xOfFar(c) : xFtrue(c));
+  var pupilPts=[-18,0,18];
+  var spotY = AXIS_Y + soft(sampleY(c,qY)-AXIS_Y, 22);   // 影动光斑（与光路同一几何）
+
+  for(var i=0;i<3;i++){
+    var yp=AXIS_Y+pupilPts[i];
+    var d;
+    if(power===0){                            // 正视：平行出射
+      var m=(retY-AXIS_Y)/(RET_X-780);
+      d="M"+RET_X+" "+retY+" L780 "+yp+" L66 "+(yp + m*(66-780));
+    }else if(power<0){                        // 近视：出射光先汇聚于远点面像 Q=(xF,qY)，过 Q 后发散
+      d="M"+RET_X+" "+retY+" L780 "+yp+" L"+xF+" "+qY+" L66 "+(qY + (yp-qY)*(66-xF)/(780-xF));
+    }else{                                    // 远视：出射光发散，反向延长交于眼后 Q
+      var slope=(yp-qY)/(780-xF);
+      d="M"+RET_X+" "+retY+" L780 "+yp+" L66 "+(yp + slope*(66-780));
+    }
+    $("ray"+(i+1)).setAttribute("d",d);
+    var ve=$("vext"+(i+1));
+    if(ve){
+      if(power>0){ ve.setAttribute("d","M780 "+yp+" L"+xF+" "+qY); ve.setAttribute("opacity",.55); }
+      else ve.setAttribute("opacity",0);
+    }
+  }
+  /* 高亮进入窥孔的那条光线（与影动光斑同源） */
+  var hi;
+  if(power<0 && infMode.checked){
+    // 无穷远：光线在远点 Q 处交叉后再发散，其中一条射向 ∞ 处的检查者
+    hi="M"+RET_X+" "+retY+" L780 "+spotY+" L"+xF+" "+qY+" L"+xo+" "+AXIS_Y;
+  }else{
+    hi="M"+RET_X+" "+retY+" L780 "+spotY+" L"+xo+" "+AXIS_Y;
+  }
+  $("rayHi").setAttribute("d",hi);
+
+  /* 窥孔进光提示 */
+  var pg = c.mv==="zhong" ? 0.25+0.7*(window.__zhongBright||0) : 0.45;
+  $("peepholeGlow").setAttribute("opacity", pg);
+}
+
+/* ---------- 启动 ---------- */
+sync();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

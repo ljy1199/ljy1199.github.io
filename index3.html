@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>检影验光流程闯关 · 总结页小游戏</title>
+<style>
+  :root{
+    --bg:#f2f6fc;
+    --panel:#ffffff;
+    --ink:#16273f;
+    --muted:#6d8099;
+    --blue:#2f6fd0;
+    --blue-d:#1c4f9e;
+    --blue-l:#eaf1fd;
+    --green:#17a673;
+    --green-l:#e2f7ee;
+    --red:#dd5043;
+    --red-l:#fdecea;
+    --line:#b7cae8;
+    --r:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Microsoft YaHei","PingFang SC","Hiragino Sans GB",system-ui,-apple-system,sans-serif;
+    background:radial-gradient(1100px 520px at 12% -12%, #e2ecfb 0%, var(--bg) 48%) fixed;
+    color:var(--ink);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- header ---------- */
+  header{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:22px;
+    flex-wrap:wrap;
+    padding:20px 26px 6px;
+  }
+  .brand{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .logo{
+    background:linear-gradient(150deg,#4a86e0,#2158ad);
+    color:#fff;font-size:12px;font-weight:700;letter-spacing:2px;
+    padding:5px 10px;border-radius:7px;
+    box-shadow:0 5px 12px rgba(33,88,173,.28);
+    white-space:nowrap;
+  }
+  h1{margin:0;font-size:23px;letter-spacing:.5px}
+  .sub{margin:5px 0 0;color:var(--muted);font-size:13px}
+
+  .right-col{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .stats{display:flex;gap:8px}
+  .stat{
+    background:var(--panel);border:1px solid #dfe8f6;border-radius:11px;
+    padding:6px 13px;text-align:center;min-width:70px;
+    box-shadow:0 4px 12px rgba(28,68,128,.07);
+  }
+  .stat span{display:block;font-size:11px;color:var(--muted);letter-spacing:.5px}
+  .stat b{font-size:17px;color:var(--blue-d);font-variant-numeric:tabular-nums}
+  .stat b.ok{color:var(--green)}
+
+  .tools{display:flex;gap:8px;flex-wrap:wrap}
+  button{
+    font-family:inherit;font-size:13px;font-weight:600;
+    border-radius:10px;cursor:pointer;transition:.15s;
+    border:1px solid #cfe0f7;background:#fff;color:var(--blue-d);
+    padding:8px 13px;
+  }
+  button:hover{background:var(--blue-l);border-color:var(--blue);transform:translateY(-1px)}
+  button:active{transform:none}
+  button.ghost{color:var(--muted);border-color:#e2e9f3}
+  button.ghost:hover{background:#f4f7fb;color:var(--ink)}
+
+  /* ---------- layout ---------- */
+  main{
+    display:grid;grid-template-columns:286px minmax(0,1fr);
+    gap:18px;padding:14px 26px 40px;align-items:start;
+  }
+  @media (max-width:940px){
+    main{grid-template-columns:1fr}
+    header{padding-bottom:2px}
+  }
+
+  .panel{
+    background:var(--panel);border:1px solid #e0e9f6;border-radius:16px;
+    box-shadow:0 10px 28px rgba(28,68,128,.08);
+  }
+
+  /* ---------- card pool ---------- */
+  .pool{padding:16px 15px 18px;position:sticky;top:14px}
+  .pool h2{margin:0 0 3px;font-size:15px;letter-spacing:.5px}
+  .pool .tip{margin:0 0 12px;font-size:11.5px;color:var(--muted);line-height:1.6}
+  .cards{display:flex;flex-direction:column;gap:8px;min-height:60px}
+  .card{
+    border:2px solid #cfe0f7;background:#fff;border-radius:11px;
+    padding:10px 12px;font-size:13.5px;font-weight:600;color:var(--blue-d);
+    text-align:center;cursor:pointer;user-select:none;transition:.16s;
+    box-shadow:0 2px 5px rgba(47,111,208,.08);
+  }
+  .card:hover{transform:translateY(-2px);border-color:var(--blue);box-shadow:0 7px 15px rgba(47,111,208,.18)}
+  .card.sel{
+    background:linear-gradient(155deg,#4f8ae3,#2b66c6);color:#fff;
+    border-color:var(--blue-d);transform:translateY(-2px) scale(1.02);
+    box-shadow:0 9px 20px rgba(47,111,208,.32);
+  }
+  .card.pulse{animation:pulse .9s ease-in-out infinite}
+  .card.long{font-size:12.5px;line-height:1.55;padding:9px 10px}
+  @keyframes pulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(47,111,208,.45)}
+    50%{box-shadow:0 0 0 9px rgba(47,111,208,0)}
+  }
+  .pool.shake{animation:shake .4s}
+  @keyframes shake{
+    0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}
+    40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}
+  }
+  .empty-note{font-size:12px;color:var(--muted);text-align:center;padding:16px 0}
+
+  /* ---------- board ---------- */
+  .board{padding:22px 20px 26px}
+  .board-head{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:12px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px dashed #e3ecf8;
+  }
+  .board-head h2{margin:0;font-size:15px;letter-spacing:.5px}
+  .board-head .note{font-size:11.5px;color:var(--muted)}
+
+  .wrap{position:relative;border:0;padding:0;margin:0}
+  .links{position:absolute;top:0;left:0;pointer-events:none;z-index:1;overflow:visible}
+
+  .grid{
+    position:relative;z-index:2;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:32px 46px;
+    border:0;padding:0;
+  }
+  @media (max-width:700px){
+    .grid{gap:22px 20px}
+  }
+
+  .slot{
+    position:relative;
+    min-height:54px;border-radius:12px;
+    border:2px dashed var(--line);background:#f7fbff;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    font-size:13.5px;font-weight:600;color:#a9bcd6;
+    padding:8px 12px;cursor:pointer;transition:.18s;
+    line-height:1.35;
+  }
+  .slot:hover:not(.filled){border-color:var(--blue);background:#eef5ff;color:var(--blue)}
+  .slot.armed{border-color:var(--blue);background:#eef5ff;color:var(--blue);animation:arm 1.5s ease-in-out infinite}
+  @keyframes arm{
+    0%,100%{box-shadow:0 0 0 0 rgba(47,111,208,.34)}
+    50%{box-shadow:0 0 0 7px rgba(47,111,208,0)}
+  }
+  .slot.wide{width:min(100%, 340px);justify-self:center}
+  .slot.long{font-size:12.5px;line-height:1.55;padding:8px 10px}
+
+  .slot.filled{
+    border-style:solid;border-color:var(--blue-d);
+    background:linear-gradient(158deg,#4d88e2,#2c67c7);
+    color:#fff;font-weight:700;cursor:default;
+    box-shadow:0 7px 16px rgba(44,103,199,.3);
+    animation:pop .32s cubic-bezier(.2,1.5,.5,1);
+  }
+  @keyframes pop{0%{transform:scale(.86)}100%{transform:scale(1)}}
+  .slot.filled::after{
+    content:"✓";position:absolute;top:-8px;right:-8px;
+    width:20px;height:20px;border-radius:50%;
+    background:var(--green);color:#fff;font-size:12px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 3px 8px rgba(23,166,115,.4);
+  }
+  .slot.bad{
+    border-color:var(--red);background:var(--red-l);color:var(--red);
+    animation:shake .42s;
+  }
+  .slot.float{animation:pop .3s cubic-bezier(.2,1.5,.5,1)}
+
+  /* ---------- result ---------- */
+  .overlay{
+    position:fixed;inset:0;background:rgba(18,36,64,.42);
+    display:flex;align-items:center;justify-content:center;padding:22px;
+    opacity:0;pointer-events:none;transition:.25s;z-index:50;
+    backdrop-filter:blur(3px);
+  }
+  .overlay.show{opacity:1;pointer-events:auto}
+  .modal{
+    background:#fff;border-radius:20px;max-width:470px;width:100%;
+    padding:26px 26px 22px;text-align:center;
+    box-shadow:0 26px 60px rgba(14,40,80,.34);
+    transform:translateY(14px) scale(.97);transition:.28s cubic-bezier(.2,1.3,.5,1);
+  }
+  .overlay.show .modal{transform:none}
+  .modal .crown{font-size:34px;line-height:1}
+  .modal h3{margin:8px 0 4px;font-size:20px}
+  .stars{font-size:26px;letter-spacing:6px;color:#f0b429;margin:6px 0 12px}
+  .sum{display:flex;justify-content:center;gap:26px;margin:14px 0 16px}
+  .sum div{font-size:12px;color:var(--muted)}
+  .sum b{display:block;font-size:19px;color:var(--blue-d);margin-top:2px}
+  .recap{
+    text-align:left;background:#f6f9fe;border:1px solid #e3ecf8;border-radius:12px;
+    padding:12px 14px;font-size:12.5px;line-height:1.85;color:#2c4560;
+  }
+  .recap b{color:var(--blue-d)}
+  .modal .tools{justify-content:center;margin-top:18px}
+
+  /* ---------- footer knowledge ---------- */
+  .know{
+    margin:0 26px 34px;padding:16px 18px;font-size:12.5px;line-height:1.9;color:#3a5470;
+  }
+  .know h4{margin:0 0 6px;font-size:13.5px;color:var(--blue-d);letter-spacing:.5px}
+  .know code{
+    background:var(--blue-l);color:var(--blue-d);border-radius:5px;
+    padding:1px 6px;font-family:inherit;font-weight:600;font-size:12px;
+  }
+  .toast{
+    position:fixed;left:50%;bottom:34px;transform:translate(-50%,14px);
+    background:#1b3355;color:#fff;font-size:13px;font-weight:600;
+    padding:10px 18px;border-radius:999px;opacity:0;pointer-events:none;
+    transition:.25s;z-index:60;box-shadow:0 12px 26px rgba(14,40,80,.3);
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="brand">
+      <span class="logo">验光学</span>
+      <h1>检影验光流程闯关</h1>
+    </div>
+    <p class="sub">把左侧打乱的步骤卡片放回右侧流程图的正确位置,复原「总结」页的完整检查流程</p>
+  </div>
+  <div class="right-col">
+    <div class="stats">
+      <div class="stat"><span>得分</span><b id="score">0</b></div>
+      <div class="stat"><span>连击</span><b id="combo">0</b></div>
+      <div class="stat"><span>失误</span><b id="miss">0</b></div>
+      <div class="stat"><span>用时</span><b id="time">00:00</b></div>
+    </div>
+    <div class="tools">
+      <button id="hintBtn">提示 <span style="opacity:.65">-5</span></button>
+      <button id="ansBtn" class="ghost">演示答案</button>
+      <button id="resetBtn" class="ghost">重新开始</button>
+      <button id="soundBtn" class="ghost" title="音效开关">🔊</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <aside class="panel pool" id="pool">
+    <h2>步骤卡片</h2>
+    <p class="tip">① 点一张卡片选中<br>② 再点右侧任意空格放入<br>放对得分,放错扣分并清零连击</p>
+    <div class="cards" id="cards"></div>
+  </aside>
+
+  <section class="panel board">
+    <div class="board-head">
+      <h2>检影验光流程</h2>
+      <span class="note" id="progress">进度 0 / 9</span>
+    </div>
+    <div class="wrap" id="wrap">
+      <svg class="links" id="links"></svg>
+      <div class="grid" id="grid"></div>
+    </div>
+  </section>
+</main>
+
+<div class="panel know">
+  <h4>知识小结</h4>
+  检影验光先做<b>操作准备</b>,再<b>在 45°、90°、135°、180° 四个方向运动,判断映光动向</b>,依据屈光不正类型分两条路径:<br>
+  ① <code>球性屈光不正</code> → 加矫正镜中和影动 → 得到粗检影度数 → 计算纯检影度数;<br>
+  ② <code>散光屈光不正</code> → 判断主子午线 → 按 <code>球-球法</code> 或 <code>球-柱法</code> 中和 → 得到粗检影度数 → 计算纯检影度数。<br>
+  两条路径在「得到粗检影度数」处汇合,最后统一换算为<b>纯检影度数</b>。
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="crown" id="crown">🏆</div>
+    <h3 id="rTitle">流程通关!</h3>
+    <div class="stars" id="stars">★★★</div>
+    <div class="sum">
+      <div>得分<b id="rScore">0</b></div>
+      <div>用时<b id="rTime">00:00</b></div>
+      <div>失误<b id="rMiss">0</b></div>
+    </div>
+    <div class="recap" id="recap"></div>
+    <div class="tools">
+      <button id="againBtn">再来一次</button>
+      <button id="closeBtn" class="ghost">看看流程</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ 数据 ============ */
+  const STEPS = [
+    {key:'op',  text:'操作准备'},
+    {key:'chk', text:'在 45°、90°、135°、180° 四个方向运动,判断映光动向',
+                html:'在 45°、90°、135°、180° 四个方向运动<br>判断映光动向'},
+    {key:'sph', text:'球性屈光不正'},
+    {key:'cyl', text:'散光屈光不正'},
+    {key:'add', text:'加矫正镜中和影动'},
+    {key:'mer', text:'判断主子午线'},
+    {key:'sbc', text:'球-球法 / 球-柱法'},
+    {key:'cr',  text:'得到粗检影度数'},
+    {key:'pu',  text:'计算纯检影度数'}
+  ];
+
+  // 与原图一致:单链路在前,散光支多一层,两支在最后一格汇合
+  const LAYOUT = [
+    {key:'op',  row:1, span:2},
+    {key:'chk', row:2, span:2},
+    {key:'sph', row:3, col:1},
+    {key:'cyl', row:3, col:2},
+    {key:'add', row:4, col:1},
+    {key:'mer', row:4, col:2},
+    {key:'sbc', row:5, col:2},
+    {key:'cr',  row:6, span:2},
+    {key:'pu',  row:7, span:2}
+  ];
+
+  const EDGES = [
+    ['op','chk'], ['chk','sph'], ['chk','cyl'],
+    ['sph','add'], ['cyl','mer'], ['mer','sbc'],
+    ['add','cr'],  ['sbc','cr'],  ['cr','pu']
+  ];
+
+  const TEXT = {};
+  const HTML = {};
+  STEPS.forEach(s => { TEXT[s.key] = s.text; HTML[s.key] = s.html || s.text; });
+
+  /* ============ DOM ============ */
+  const $ = sel => document.querySelector(sel);
+  const gridEl = $('#grid');
+  const cardsEl = $('#cards');
+  const linksEl = $('#links');
+  const slotEl = {};
+  const cardEl = {};
+
+  /* ============ 状态 ============ */
+  let S = {};
+
+  function newState(){
+    S = {
+      sel:null,          // 当前选中的卡片 key
+      filled:{},         // key -> true
+      score:0, combo:0, miss:0,
+      done:0, total:STEPS.length,
+      t0:null, tick:null, locked:false, sound:true, playing:false
+    };
+  }
+
+  /* ============ 音效 ============ */
+  let ac = null;
+  function beep(freq, dur, type, vol){
+    if(!S.sound) return;
+    try{
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+      if(ac.state === 'suspended') ac.resume();
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = type || 'sine';
+      o.frequency.value = freq;
+      g.gain.value = vol || .05;
+      o.connect(g); g.connect(ac.destination);
+      o.start();
+      g.gain.exponentialRampToValueAtTime(.0001, ac.currentTime + dur);
+      o.stop(ac.currentTime + dur + .02);
+    }catch(e){ /* 静默 */ }
+  }
+  const sfxOk    = () => { beep(740, .1, 'sine', .05); setTimeout(()=>beep(1180, .13, 'sine', .045), 80); };
+  const sfxBad   = () => beep(170, .2, 'triangle', .06);
+  const sfxWin   = () => [0,120,240,400].forEach((d,i)=>setTimeout(()=>beep([660,880,1100,1480][i], .18, 'sine', .05), d));
+
+  /* ============ 构建棋盘 ============ */
+  function buildBoard(){
+    gridEl.innerHTML = '';
+    for(const k in slotEl) delete slotEl[k];
+
+    LAYOUT.forEach(cfg => {
+      const d = document.createElement('div');
+      d.className = 'slot' + (cfg.span === 2 ? ' wide' : '') + (TEXT[cfg.key].length > 9 ? ' long' : '');
+      d.dataset.key = cfg.key;
+      d.style.gridRow = cfg.row;
+      d.style.gridColumn = cfg.span === 2 ? '1 / span 2' : String(cfg.col);
+      d.textContent = '?';
+      d.addEventListener('click', () => onSlotClick(cfg.key));
+      gridEl.appendChild(d);
+      slotEl[cfg.key] = d;
+    });
+  }
+
+  /* ============ 构建卡片 ============ */
+  function buildCards(){
+    cardsEl.innerHTML = '';
+    for(const k in cardEl) delete cardEl[k];
+
+    const pool = STEPS.slice();
+    for(let i = pool.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+
+    pool.forEach(s => {
+      const c = document.createElement('div');
+      c.className = 'card' + (s.text.length > 9 ? ' long' : '');
+      c.dataset.key = s.key;
+      c.innerHTML = HTML[s.key];
+      c.addEventListener('click', () => onCardClick(s.key));
+      cardsEl.appendChild(c);
+      cardEl[s.key] = c;
+    });
+  }
+
+  /* ============ 连线 ============ */
+  function drawLinks(){
+    const W = gridEl.clientWidth, H = gridEl.clientHeight;
+    if(!W || !H) return;
+    linksEl.setAttribute('width', W);
+    linksEl.setAttribute('height', H);
+    linksEl.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+
+    let buf = '<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" '
+            + 'markerWidth="5" markerHeight="5" orient="auto">'
+            + '<path d="M0,0 L10,5 L0,10 z" fill="#9fbde8"/></marker></defs>';
+
+    EDGES.forEach(pair => {
+      const a = slotEl[pair[0]], b = slotEl[pair[1]];
+      if(!a || !b) return;
+      const ax = a.offsetLeft + a.offsetWidth / 2;
+      const ay = a.offsetTop + a.offsetHeight;
+      const bx = b.offsetLeft + b.offsetWidth / 2;
+      const by = b.offsetTop - 7;
+      let d;
+      if(Math.abs(ax - bx) < 1){
+        d = 'M ' + ax + ' ' + ay + ' L ' + bx + ' ' + by;
+      }else{
+        const my = ay + (by - ay) / 2;
+        d = 'M ' + ax + ' ' + ay + ' V ' + my + ' H ' + bx + ' V ' + by;
+      }
+      buf += '<path d="' + d + '" fill="none" stroke="#a9c5ea" stroke-width="2" '
+           + 'stroke-linejoin="round" marker-end="url(#ar)"/>';
+    });
+    linksEl.innerHTML = buf;
+  }
+
+  /* ============ 取答案 ============ */
+  function answerOf(key){ return HTML[key]; }
+
+  /* ============ 交互 ============ */
+  function onCardClick(key){
+    if(S.locked || S.filled[key]) return;
+    if(S.sel === key){ S.sel = null; }
+    else { S.sel = key; }
+    refreshSel();
+    startClock();
+  }
+
+  function refreshSel(){
+    for(const k in cardEl){
+      cardEl[k].classList.toggle('sel', S.sel === k);
+      cardEl[k].classList.remove('pulse');
+    }
+    for(const k in slotEl){
+      const s = slotEl[k];
+      const arm = S.sel && !S.filled[k] && S.sel === k;
+      s.classList.toggle('armed', !!arm);
+    }
+  }
+
+  function onSlotClick(key){
+    if(S.locked || S.filled[key]) return;
+    startClock();
+
+    if(!S.sel){
+      $('#pool').classList.add('shake');
+      setTimeout(()=>$('#pool').classList.remove('shake'), 420);
+      toast('先在左侧选一张卡片');
+      return;
+    }
+
+    const slot = slotEl[key];
+    if(S.sel === key){
+      // 正确
+      S.filled[key] = true;
+      slot.classList.remove('armed');
+      slot.classList.add('filled');
+      slot.innerHTML = answerOf(key);
+
+      const card = cardEl[key];
+      if(card){ card.style.transition = '.22s'; card.style.opacity = '0';
+                card.style.transform = 'scale(.9)';
+                setTimeout(()=>{ if(card.parentNode) card.parentNode.removeChild(card); }, 220); }
+
+      S.combo += 1;
+      const gain = 10 + Math.min((S.combo - 1) * 2, 10);
+      S.score += gain;
+      S.done += 1;
+      S.sel = null;
+      sfxOk();
+      refreshSel(); updateStats();
+
+      if(S.done === S.total) finish();
+    }else{
+      // 错误
+      slot.classList.add('bad');
+      setTimeout(()=>slot.classList.remove('bad'), 460);
+      slot.classList.add('float');
+      setTimeout(()=>slot.classList.remove('float'), 320);
+      S.miss += 1;
+      S.combo = 0;
+      S.score = Math.max(0, S.score - 3);
+      sfxBad();
+      updateStats();
+      toast('位置不对哦,再想想流程顺序');
+    }
+  }
+
+  function updateStats(){
+    $('#score').textContent = S.score;
+    $('#combo').textContent = S.combo;
+    $('#miss').textContent = S.miss;
+    $('#progress').textContent = '进度 ' + S.done + ' / ' + S.total;
+    const sm = $('#combo');
+    sm.classList.toggle('ok', S.combo >= 3);
+  }
+
+  /* ============ 计时 ============ */
+  function startClock(){
+    if(S.t0 || S.locked) return;
+    S.t0 = Date.now();
+    S.tick = setInterval(()=>{ $('#time').textContent = fmt(elapsed()); }, 500);
+  }
+  function elapsed(){ return S.t0 ? Math.floor((Date.now() - S.t0) / 1000) : 0; }
+  function stopClock(){ if(S.tick) clearInterval(S.tick); S.tick = null; }
+  function fmt(sec){
+    const m = String(Math.floor(sec / 60)).padStart(2, '0');
+    const s = String(sec % 60).padStart(2, '0');
+    return m + ':' + s;
+  }
+
+  /* ============ 结算 ============ */
+  function finish(){
+    stopClock();
+    S.locked = true;
+    const sec = elapsed();
+    const stars = (S.miss === 0 && sec <= 60) ? 3 : (S.miss <= 2 ? 2 : 1);
+    sfxWin();
+
+    $('#rScore').textContent = S.score;
+    $('#rTime').textContent = fmt(sec);
+    $('#rMiss').textContent = S.miss;
+    $('#stars').textContent = '★★★'.slice(0, stars) + '☆☆☆'.slice(0, 3 - stars);
+    $('#crown').textContent = stars === 3 ? '🏆' : (stars === 2 ? '🎉' : '💪');
+    $('#rTitle').textContent = stars === 3 ? '完美通关!' : (stars === 2 ? '流程通关!' : '通关啦,再练一遍更稳');
+    $('#recap').innerHTML =
+      '<b>操作准备</b> → <b>在 45°、90°、135°、180° 四个方向运动,判断映光动向</b><br>' +
+      '① 球性屈光不正 → 加矫正镜中和影动 → 得到粗检影度数 → 计算纯检影度数<br>' +
+      '② 散光屈光不正 → 判断主子午线 →「球-球法 / 球-柱法」→ 得到粗检影度数 → 计算纯检影度数<br>' +
+      '两条路径在「得到粗检影度数」处汇合,最后统一换算出纯检影度数。';
+    setTimeout(()=>$('#overlay').classList.add('show'), 420);
+  }
+
+  /* ============ 提示 / 演示 / 重开 ============ */
+  function hint(){
+    if(S.locked) return;
+    startClock();
+    const order = LAYOUT.map(l => l.key);
+    const next = order.find(k => !S.filled[k]);
+    if(!next) return;
+    S.score = Math.max(0, S.score - 5);
+    S.combo = 0;
+    updateStats();
+    S.sel = next;
+    refreshSel();
+    if(cardEl[next]){
+      cardEl[next].classList.add('pulse', 'sel');
+      cardEl[next].scrollIntoView({block:'nearest', behavior:'smooth'});
+    }
+    toast('已为你标出下一步');
+  }
+
+  function showAnswer(){
+    if(S.locked) return;
+    S.locked = true;
+    stopClock();
+    S.sel = null;
+    LAYOUT.forEach(l => {
+      const s = slotEl[l.key];
+      s.classList.remove('armed');
+      s.classList.add('filled');
+      s.innerHTML = answerOf(l.key);
+      S.filled[l.key] = true;
+      const c = cardEl[l.key];
+      if(c && c.parentNode) c.parentNode.removeChild(c);
+    });
+    S.done = S.total;
+    updateStats();
+    $('#progress').textContent = '进度 9 / 9(演示)';
+    toast('已展示标准流程,点「重新开始」再挑战一次');
+  }
+
+  function reset(){
+    stopClock();
+    newState();
+    buildBoard();
+    buildCards();
+    updateStats();
+    $('#time').textContent = '00:00';
+    $('#overlay').classList.remove('show');
+    requestAnimationFrame(()=>{ drawLinks(); refreshSel(); });
+  }
+
+  /* ============ Toast ============ */
+  let toastTimer = null;
+  function toast(msg){
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    if(toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>t.classList.remove('show'), 1700);
+  }
+
+  /* ============ 事件绑定 ============ */
+  $('#hintBtn').addEventListener('click', hint);
+  $('#ansBtn').addEventListener('click', showAnswer);
+  $('#resetBtn').addEventListener('click', reset);
+  $('#againBtn').addEventListener('click', reset);
+  $('#closeBtn').addEventListener('click', ()=>$('#overlay').classList.remove('show'));
+  $('#soundBtn').addEventListener('click', function(){
+    S.sound = !S.sound;
+    this.textContent = S.sound ? '🔊' : '🔇';
+    if(S.sound) beep(880, .1, 'sine', .05);
+  });
+
+  // 点空白处取消选中
+  document.addEventListener('click', function(e){
+    if(e.target.closest('.card') || e.target.closest('.slot') || e.target.closest('button')) return;
+    if(S.sel){ S.sel = null; refreshSel(); }
+  });
+
+  // 键盘 1-9 选卡,R 重开
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'r' || e.key === 'R'){ reset(); return; }
+    const n = parseInt(e.key, 10);
+    if(n >= 1 && n <= 9){
+      const alive = STEPS.filter(s => !S.filled[s.key]);
+      // 按卡片当前 DOM 顺序取
+      const order = Array.from(cardsEl.children).map(el => el.dataset.key);
+      if(order[n-1]) onCardClick(order[n-1]);
+    }
+  });
+
+  let rz = null;
+  window.addEventListener('resize', function(){
+    if(rz) cancelAnimationFrame(rz);
+    rz = requestAnimationFrame(drawLinks);
+  });
+
+  /* ============ 启动 ============ */
+  newState();
+  buildBoard();
+  buildCards();
+  updateStats();
+  requestAnimationFrame(drawLinks);
+  // 字体/布局稳定后再校准一次连线
+  setTimeout(drawLinks, 260);
+  window.addEventListener('load', drawLinks);
+})();
+</script>
+</body>
+</html>

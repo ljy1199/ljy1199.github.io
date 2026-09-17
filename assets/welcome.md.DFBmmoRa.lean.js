@@ -1,0 +1,1 @@
+import{G as e,W as t,n,rt as r}from"./chunks/framework.CHX_0itn.js";var i=JSON.parse(`{"title":"眼视光学 · 学科概览","description":"","frontmatter":{"next":false},"headers":[],"relativePath":"welcome.md","filePath":"welcome.md"}`),a={name:`welcome.md`};function o(n,i,a,o,s,c){return r(),t(`div`,null,[...i[0]||=[e("",9)]])}var s=n(a,[[`render`,o]]);export{i as __pageData,s as default};
